@@ -124,11 +124,41 @@ export const unpluginRsPackRouterCodeSplitterFactory: UnpluginFactory<
         )
       })
       compiler.options.module.rules.push({
-        test: (id) => fileIsInRoutesDirectory(id, userConfig.routesDirectory),
+        test: (id) =>
+          fileIsInRoutesDirectory(id, userConfig.routesDirectory) ||
+          id.includes(JoinedSplitPrefix),
         //@ts-ignore
-        use(data) {
+        async use(data) {
           // console.log(data)
-          return 'module.exports = "your code here"'
+          // return 'module.exports = "your code here"'
+          if (!data.resource) {
+            return undefined
+          }
+          console.log({
+            resource: data.resource,
+            resourceQuery: data.resourceQuery,
+          })
+          const url = pathToFileURL(data.resource)
+          console.log('url', url)
+          url.searchParams.delete('v')
+          const id = fileURLToPath(url).replace(/\\/g, '/')
+
+          const code = readFileSync(id, 'utf-8').toString()
+
+          if (id.includes(splitPrefix)) {
+            const splitFileCode = await handleSplittingFile(code, id)
+            console.log(id, '\n', splitFileCode.code)
+            return splitFileCode.code
+          } else if (
+            fileIsInRoutesDirectory(id, userConfig.routesDirectory) &&
+            (code.includes('createRoute(') || code.includes('createFileRoute('))
+          ) {
+            const compiledFileCode = await handleCompilingFile(code, id)
+            // console.log(id, '\n', compiledFileCode.code)
+            return compiledFileCode
+          }
+
+          return undefined
         },
       })
       // TODO: explore replacing the above hook with https://webpack.js.org/plugins/normal-module-replacement-plugin/
