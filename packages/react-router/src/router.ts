@@ -1298,7 +1298,13 @@ export class Router<
     })
   }
 
+  locationMap = new WeakMap<object, ParsedLocation>()
+
   buildLocation: BuildLocationFn = (opts) => {
+    if (this.locationMap.has(opts)) {
+      this.locationMap.get(opts)
+    }
+
     const build = (
       dest: BuildNextOptions & {
         unmaskOnReload?: boolean
@@ -1502,14 +1508,14 @@ export class Router<
       return final
     }
 
-    if (opts.mask) {
-      return buildWithMatches(opts, {
-        ...pick(opts, ['from']),
-        ...opts.mask,
-      })
-    }
-
-    return buildWithMatches(opts)
+    const location = opts.mask
+      ? buildWithMatches(opts, {
+          ...pick(opts, ['from']),
+          ...opts.mask,
+        })
+      : buildWithMatches(opts)
+    this.locationMap.set(opts, location)
+    return location
   }
 
   commitLocationPromise: undefined | ControlledPromise<void>
