@@ -302,7 +302,7 @@ export function removeBasepath(basepath: string, pathname: string) {
   }
 }
 
-const matchCache = new Map<string, Record<string, string>>()
+const matchByPathCache = new Map<string, Record<string, string>>()
 
 export function matchByPath(
   basepath: string,
@@ -310,8 +310,8 @@ export function matchByPath(
   matchLocation: Pick<MatchLocation, 'to' | 'caseSensitive' | 'fuzzy'>,
 ): Record<string, string> | undefined {
   const cacheKey = `${basepath}-${from}-${matchLocation.to}-${matchLocation.caseSensitive}-${matchLocation.fuzzy}`
-  if (matchCache.has(cacheKey)) {
-    return matchCache.get(cacheKey)
+  if (matchByPathCache.has(cacheKey)) {
+    return matchByPathCache.get(cacheKey)
   }
 
   // Remove the base path from the pathname
@@ -407,7 +407,7 @@ export function matchByPath(
   })()
 
   if (isMatch) {
-    matchCache.set(cacheKey, params)
+    matchByPathCache.set(cacheKey, params)
     return params
   }
   return undefined
