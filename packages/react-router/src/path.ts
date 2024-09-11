@@ -139,9 +139,16 @@ export function resolvePath({
   return cleanPath(joined)
 }
 
+const parsePathnameCache = new Map<string, Array<Segment>>()
+
 export function parsePathname(pathname?: string): Array<Segment> {
   if (!pathname) {
     return []
+  }
+
+  const origPathname = pathname
+  if (parsePathnameCache.has(origPathname)) {
+    return parsePathnameCache.get(origPathname)!
   }
 
   pathname = cleanPath(pathname)
@@ -157,6 +164,7 @@ export function parsePathname(pathname?: string): Array<Segment> {
   }
 
   if (!pathname) {
+    parsePathnameCache.set(origPathname, segments)
     return segments
   }
 
@@ -194,6 +202,7 @@ export function parsePathname(pathname?: string): Array<Segment> {
     })
   }
 
+  parsePathnameCache.set(origPathname, segments)
   return segments
 }
 
