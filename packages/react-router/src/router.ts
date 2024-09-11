@@ -1298,13 +1298,7 @@ export class Router<
     })
   }
 
-  locationMap = new WeakMap<object, ParsedLocation>()
-
   buildLocation: BuildLocationFn = (opts) => {
-    if (this.locationMap.has(opts)) {
-      return this.locationMap.get(opts)!
-    }
-
     const build = (
       dest: BuildNextOptions & {
         unmaskOnReload?: boolean
@@ -1515,7 +1509,6 @@ export class Router<
           ...opts.mask,
         })
       : buildWithMatches(opts)
-    this.locationMap.set(opts, location)
     return location
   }
 
