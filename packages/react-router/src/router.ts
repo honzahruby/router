@@ -1438,7 +1438,7 @@ export class Router<
 
       nextState = replaceEqualDeep(this.latestLocation.state, nextState)
 
-      const location: ParsedLocation = {
+      return {
         pathname,
         search,
         searchStr,
@@ -1447,7 +1447,6 @@ export class Router<
         href: `${pathname}${searchStr}${hashStr}`,
         unmaskOnReload: dest.unmaskOnReload,
       }
-      return location
     }
 
     const buildWithMatches = (
@@ -1503,13 +1502,14 @@ export class Router<
       return final
     }
 
-    const location = opts.mask
-      ? buildWithMatches(opts, {
-          ...pick(opts, ['from']),
-          ...opts.mask,
-        })
-      : buildWithMatches(opts)
-    return location
+    if (opts.mask) {
+      return buildWithMatches(opts, {
+        ...pick(opts, ['from']),
+        ...opts.mask,
+      })
+    }
+
+    return buildWithMatches(opts)
   }
 
   commitLocationPromise: undefined | ControlledPromise<void>
