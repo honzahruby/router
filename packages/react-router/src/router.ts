@@ -1302,7 +1302,7 @@ export class Router<
 
   buildLocation: BuildLocationFn = (opts) => {
     if (this.locationMap.has(opts)) {
-      this.locationMap.get(opts)
+      return this.locationMap.get(opts)!
     }
 
     const build = (
@@ -1444,7 +1444,7 @@ export class Router<
 
       nextState = replaceEqualDeep(this.latestLocation.state, nextState)
 
-      return {
+      const location: ParsedLocation = {
         pathname,
         search,
         searchStr,
@@ -1453,6 +1453,7 @@ export class Router<
         href: `${pathname}${searchStr}${hashStr}`,
         unmaskOnReload: dest.unmaskOnReload,
       }
+      return location
     }
 
     const buildWithMatches = (
