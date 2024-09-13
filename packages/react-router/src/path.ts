@@ -302,7 +302,7 @@ export function removeBasepath(basepath: string, pathname: string) {
   }
 }
 
-const matchByPathCache = new Map<string, Record<string, string>>()
+const matchByPathCache = new Map<string, Record<string, string> | undefined>()
 
 export function matchByPath(
   basepath: string,
@@ -406,9 +406,7 @@ export function matchByPath(
     return true
   })()
 
-  if (isMatch) {
-    matchByPathCache.set(cacheKey, params)
-    return params
-  }
-  return undefined
+  const match = isMatch ? params : undefined
+  matchByPathCache.set(cacheKey, match)
+  return match
 }
