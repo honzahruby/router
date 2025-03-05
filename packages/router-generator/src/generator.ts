@@ -3,7 +3,6 @@ import * as fs from 'node:fs'
 import * as fsp from 'node:fs/promises'
 import {
   determineInitialRoutePath,
-  format,
   logging,
   multiSortBy,
   removeExt,
@@ -776,7 +775,7 @@ export async function generator(config: Config, root: string) {
   const routeTreeWriteResult = await writeIfDifferent(
     path.resolve(config.generatedRouteTree),
     existingRouteTreeContent,
-    await format(routeConfigFileContent, config),
+    routeConfigFileContent,
     {
       beforeWrite: () => {
         logger.log(`🟡 Updating ${config.generatedRouteTree}`)
