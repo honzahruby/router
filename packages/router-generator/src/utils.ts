@@ -1,4 +1,6 @@
+import * as crypto from 'node:crypto'
 import * as fs from 'node:fs'
+import * as zlib from 'node:zlib'
 import * as prettier from 'prettier'
 import type { Config } from './config'
 
@@ -145,6 +147,12 @@ export async function writeIfDifferent(
 }
 
 /**
+ * Custom cache for prettier formatted content.
+ * Hash of the raw content is used as a key. The formatted content is compressed and stored as a buffer.
+ */
+const formatCache = new Map<string, Buffer>()
+
+/**
  * This function formats the source code using the default formatter (Prettier).
  *
  * @param source The content to format
@@ -152,12 +160,21 @@ export async function writeIfDifferent(
  * @returns The formatted content
  */
 export async function format(source: string, config: Config): Promise<string> {
+  const hash = crypto.createHash('sha256').update(source).digest('hex')
+  if (formatCache.has(hash)) {
+    return zlib.inflateSync(formatCache.get(hash)!).toString()
+  }
+
   const prettierOptions: prettier.Config = {
     semi: config.semicolons,
     singleQuote: config.quoteStyle === 'single',
     parser: 'typescript',
   }
-  return prettier.format(source, prettierOptions)
+
+  return prettier.format(source, prettierOptions).then((formatted) => {
+    formatCache.set(hash, zlib.deflateSync(formatted))
+    return formatted
+  })
 }
 
 /**
